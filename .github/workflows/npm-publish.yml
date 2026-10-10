@@ -62,6 +62,11 @@ jobs:
         if: steps.version.outputs.changed == 'true'
         run: npm run build
 
+      - name: Verify adapter factory export
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          node --input-type=module -e 'import("./dist/index.js").then((m) => { if (typeof m.createServerAdapter !== "function") { console.error("Package root does not export createServerAdapter()"); process.exit(1); } const adapter = m.createServerAdapter(); if (!adapter || typeof adapter.execute !== "function" || typeof adapter.testEnvironment !== "function") { console.error("createServerAdapter() returned an invalid adapter"); process.exit(1); } console.log("Adapter factory export OK"); })'
+
       - name: Type-check package
         if: steps.version.outputs.changed == 'true'
         run: npm run typecheck
