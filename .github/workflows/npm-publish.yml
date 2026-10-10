@@ -1,0 +1,77 @@
+name: Publish to npm
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build and publish package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Check whether package version changed
+        id: version
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          CURRENT_VERSION="$(node -p "JSON.parse(require('node:fs').readFileSync('package.json', 'utf8')).version")"
+
+          if [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            PREVIOUS_VERSION=""
+          else
+            PREVIOUS_VERSION="$(git show "$BEFORE_SHA:package.json" 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(JSON.parse(s).version || "")}catch{}})')"
+          fi
+
+          echo "Previous version: ${PREVIOUS_VERSION:-<none>}"
+          echo "Current version: $CURRENT_VERSION"
+
+          if [ "$CURRENT_VERSION" = "$PREVIOUS_VERSION" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Package version was not changed; skipping npm publish."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Package version changed; package will be built and published."
+          fi
+
+      - name: Install dependencies
+        if: steps.version.outputs.changed == 'true'
+        run: npm ci
+
+      - name: Build package
+        if: steps.version.outputs.changed == 'true'
+        run: npm run build
+
+      - name: Type-check package
+        if: steps.version.outputs.changed == 'true'
+        run: npm run typecheck
+
+      - name: Verify package contents
+        if: steps.version.outputs.changed == 'true'
+        run: npm pack --dry-run
+
+      - name: Publish to npm
+        if: steps.version.outputs.changed == 'true'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
