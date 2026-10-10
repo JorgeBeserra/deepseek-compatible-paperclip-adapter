@@ -1,11 +1,10 @@
 {
   "name": "@jorgebeserra/deepseek-compatible-paperclip-adapter",
-  "version": "2026.10.11",
+  "version": "2026.10.10",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jorgebeserra/deepseek-compatible-paperclip-adapter",
-    "directory": "packages/adapters/dashscope-api"
+    "url": "https://github.com/jorgebeserra/deepseek-compatible-paperclip-adapter"
   },
   "type": "module",
   "exports": {
@@ -20,10 +19,6 @@
     "./ui": {
       "types": "./dist/ui/index.d.ts",
       "import": "./dist/ui/index.js"
-    },
-    "./cli": {
-      "types": "./dist/cli/index.d.ts",
-      "import": "./dist/cli/index.js"
     }
   },
   "publishConfig": {
