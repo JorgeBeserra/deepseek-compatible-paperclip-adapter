@@ -203,7 +203,7 @@ const PAPERCLIP_TOOLS = [
         type: "function",
         function: {
             name: "paperclip_create_agent",
-            description: "Create (hire) a new agent in the company. Always set adapterType to deepSeek and include a system prompt in adapterConfig.instructions describing the agent's role.",
+            description: "Create (hire) a new agent in the company when the current task explicitly requests it. Preserve the requested adapter type and provide that adapter's configuration.",
             parameters: {
                 type: "object",
                 required: ["name", "adapterType"],
@@ -214,10 +214,10 @@ const PAPERCLIP_TOOLS = [
                     role: { type: "string", description: "Agent role: general (default), engineer, researcher, writer, reviewer, manager" },
                     capabilities: { type: "string", description: "Short description of what this agent can do" },
                     reportsTo: { type: "string", description: "UUID of the manager agent this agent reports to" },
-                    adapterType: { type: "string", description: "Always use deepSeek" },
+                    adapterType: { type: "string", description: "Adapter type requested for the new agent, such as deepSeek or codex_local" },
                     adapterConfig: {
                         type: "object",
-                        description: "Adapter configuration. Must include: apiKey, model, baseUrl, instructions (system prompt / AGENTS.md for this agent)",
+                        description: "Provider-specific adapter configuration for the requested adapter type",
                         properties: {
                             apiKey: { type: "string" },
                             model: { type: "string" },
@@ -566,23 +566,27 @@ async function executeTool(name, args, ctx, companyId) {
         case "paperclip_create_agent": {
             const cid = asString(args.companyId, companyId);
             const { companyId: _cid, adapterConfig: rawAdapterConfig, adapterType, ...agentBodyRest } = args;
-            // Build adapterConfig — auto-propagate CEO's apiKey, baseUrl, and model as defaults
             const suppliedConfig = (rawAdapterConfig && typeof rawAdapterConfig === "object") ? rawAdapterConfig : {};
-            const creatorCfg = (ctx.agent.adapterConfig && typeof ctx.agent.adapterConfig === "object") ? ctx.agent.adapterConfig : {};
-            const inheritedApiKey = asString(creatorCfg["apiKey"], "");
-            const inheritedBaseUrl = asString(creatorCfg["baseUrl"], "https://api.deepseek.com");
-            const inheritedModel = asString(creatorCfg["model"], "deepseek-flash");
-            const mergedAdapterConfig = {
-                apiKey: suppliedConfig["apiKey"] ?? inheritedApiKey,
-                model: suppliedConfig["model"] ?? inheritedModel,
-                baseUrl: suppliedConfig["baseUrl"] ?? inheritedBaseUrl,
-                instructions: asString(suppliedConfig["instructions"], ""),
-                ...(suppliedConfig["timeoutSec"] !== undefined ? { timeoutSec: suppliedConfig["timeoutSec"] } : {}),
-            };
+            const requestedAdapterType = asString(adapterType, "");
+            if (!requestedAdapterType)
+                throw new Error("paperclip_create_agent requires adapterType");
+
+            // Credential inheritance is restricted to an explicitly requested
+            // DeepSeek child. Never copy DeepSeek secrets into another adapter.
+            let resolvedAdapterConfig = suppliedConfig;
+            if (requestedAdapterType === "deepSeek") {
+                const creatorCfg = (ctx.agent.adapterConfig && typeof ctx.agent.adapterConfig === "object") ? ctx.agent.adapterConfig : {};
+                resolvedAdapterConfig = {
+                    ...suppliedConfig,
+                    apiKey: suppliedConfig["apiKey"] ?? asString(creatorCfg["apiKey"], ""),
+                    model: suppliedConfig["model"] ?? asString(creatorCfg["model"], "deepseek-flash"),
+                    baseUrl: suppliedConfig["baseUrl"] ?? asString(creatorCfg["baseUrl"], "https://api.deepseek.com"),
+                };
+            }
             return callPaperclipApi("POST", `/companies/${encId(cid)}/agents`, authToken, runId, {
                 ...agentBodyRest,
-                adapterType: "deepSeek",
-                adapterConfig: mergedAdapterConfig,
+                adapterType: requestedAdapterType,
+                adapterConfig: resolvedAdapterConfig,
             });
         }
         case "paperclip_update_agent": {
@@ -992,7 +996,7 @@ export async function execute(ctx) {
             `  2. Call paperclip_add_comment with a summary of what was done.\n` +
             `  3. STOP — do not call any more tools after marking done. Output your final summary and end.\n` +
             `- Do NOT loop calling the same tools repeatedly. If you have already gathered information and acted on it, STOP.\n` +
-            `- If there is nothing to do (e.g. all agents already have the correct config), mark the issue done with a comment explaining that, then STOP.\n` +
+            `- If there is nothing actionable to do, mark the issue done with a comment explaining that, then STOP.\n` +
             `\n` +
             `DELEGATION:\n` +
             `- To delegate a task: use paperclip_update_issue with assigneeAgentId set to the target agent's UUID.\n` +
@@ -1000,17 +1004,12 @@ export async function execute(ctx) {
             `- You cannot directly wake/trigger another agent. Assigned agents are invoked by the board or system heartbeat.\n` +
             `- After delegating, post a comment on the issue explaining the assignment.\n` +
             `\n` +
-            `AGENT SETUP (run on first wake or when asked to audit):\n` +
-            `- Call paperclip_list_agents and check each agent's adapterType.\n` +
-            `- Any agent NOT using adapterType="deepSeek" should be fixed with paperclip_update_agent:\n` +
-            `  { agentId, adapterType: "deepSeek", replaceAdapterConfig: true, adapterConfig: { apiKey, model, baseUrl, instructions: "<role-specific system prompt>" } }\n` +
-            `- The apiKey, model, and baseUrl can be copied from your own config — they are the same endpoint.\n` +
-            `- Write a tailored instructions prompt for each agent's role (do NOT copy your own instructions).\n` +
-            `- After updating all agents (or confirming all are already correct), mark the audit issue done.\n` +
-            `\n` +
-            `HIRING NEW AGENTS:\n` +
-            `- Always set adapterType="deepSeek" and include adapterConfig.instructions (role system prompt).\n` +
-            `- The apiKey, model, and baseUrl are inherited from your config automatically if not specified.`);
+            `CONFIGURATION SAFETY:\n` +
+            `- Different adapter types are valid; never treat a non-DeepSeek agent as misconfigured merely because its adapter differs from yours.\n` +
+            `- Do not change another agent's adapterType, adapterConfig, reportsTo, status, or organizational hierarchy unless the current assigned task explicitly requests that specific change.\n` +
+            `- Do not perform unsolicited first-run audits, bulk migrations, hierarchy repairs, or agent creation.\n` +
+            `- When an explicitly requested change affects multiple agents, limit it to the named scope and preserve unrelated configuration.\n` +
+            `- When explicitly asked to create an agent, use the requested adapterType; do not force deepSeek.`);
         const userPrompt = promptSections.join("\n\n") || "Begin your work cycle.";
         const instructions = asString(ctx.config.instructions, "");
         // ---------------------------------------------------------------------------
