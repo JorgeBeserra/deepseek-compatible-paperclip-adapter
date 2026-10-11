@@ -31,7 +31,7 @@ Selecione o tipo de adaptador `deepSeek` e configure `adapterConfig`:
 | `apiKey` | Sim | Chave da API do provedor. Para endpoints locais sem autenticação, use um valor qualquer se o endpoint aceitar isso. |
 | `model` | Sim | ID do modelo fornecido pelo provedor. |
 | `baseUrl` | Não | URL raiz da API compatível com OpenAI. |
-| `timeoutSec` | Não | Tempo limite em segundos; padrão 120. |
+| `timeoutSec` | Não | Tempo limite positivo em segundos; zero, valores negativos ou inválidos usam o padrão 120. |
 | `instructions` | Não | Instruções de sistema do agente. |
 
 ### DeepSeek
