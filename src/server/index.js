@@ -1,5 +1,6 @@
-import { DASHSCOPE_API_ADAPTER_TYPE } from "../index.js";
+import { DASHSCOPE_API_ADAPTER_TYPE } from "../constants.js";
 import { execute } from "./execute.js";
+
 async function testEnvironment(_ctx) {
     return {
         adapterType: DASHSCOPE_API_ADAPTER_TYPE,
@@ -14,6 +15,7 @@ async function testEnvironment(_ctx) {
         testedAt: new Date().toISOString(),
     };
 }
+
 export const dashscopeServerAdapter = {
     type: DASHSCOPE_API_ADAPTER_TYPE,
     execute,
@@ -21,7 +23,7 @@ export const dashscopeServerAdapter = {
 };
 
 export function createServerAdapter() {
-  return dashscopeServerAdapter;
+    return dashscopeServerAdapter;
 }
 
 export { execute };
