@@ -2,7 +2,9 @@
  * OpenAI-compatible API adapter for DeepSeek, OpenRouter, Dashscope/Qwen,
  * Ollama, and other compatible chat-completions endpoints.
  */
-export const DASHSCOPE_API_ADAPTER_TYPE = "openai_compatible_api";
+import { createServerAdapter } from "./server/index.js";
+
+export { DASHSCOPE_API_ADAPTER_TYPE } from "./constants.js";
 
 export const models = [
     { id: "deepseek-chat", label: "DeepSeek Chat" },
@@ -38,7 +40,7 @@ export const DASHSCOPE_ADAPTER_METADATA = {
     supportsLocalAgentJwt: false,
 };
 
-export { createServerAdapter } from "./server/index.js";
+export { createServerAdapter };
 export { execute } from "./server/execute.js";
 
 export default function createServerAdapterDefault() {
