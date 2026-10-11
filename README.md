@@ -48,11 +48,17 @@ Se o provedor exigir o caminho `/v1`, use `https://api.deepseek.com/v1`. A URL p
 
 Os modelos oficiais atuais são `deepseek-flash` (padrão) e `deepseek-v4-pro`. O adaptador também expõe os hooks de catálogo do Paperclip. Para que a atualização consulte `GET /models` diretamente, inicie o servidor com `DEEPSEEK_API_KEY` e, opcionalmente, `DEEPSEEK_BASE_URL`; sem essa variável global, o Paperclip usa o catálogo oficial incluído no pacote, pois sua API de descoberta não repassa a chave digitada no formulário do agente.
 
-O botão **Test** valida a configuração salva: exige API key e modelo, autentica em `GET /models` e confirma que o modelo selecionado está disponível. Essa verificação não executa uma geração de texto nem consome tokens de inferência.
+O botão **Test** valida a configuração salva: exige API key e modelo, autentica em `GET /models`, confirma que o modelo selecionado está disponível e consulta o saldo em `GET /user/balance`. As duas consultas usam a mesma API key configurada no agente. Essa verificação não executa uma geração de texto nem consome tokens de inferência.
 
 Durante cada run, o Paperclip injeta um JWT de agente de curta duração para as chamadas de ferramentas internas. Em instalações próprias, confirme que `PAPERCLIP_AGENT_JWT_SECRET` (ou o fallback `BETTER_AUTH_SECRET` nas versões atuais do Paperclip) está definido no processo do servidor.
 
 O adaptador não migra automaticamente outros agentes para DeepSeek. Alterações de adapter, credenciais, responsável ou hierarquia organizacional somente devem ocorrer quando a tarefa atual solicitar explicitamente essa mudança.
+
+### Saldo e consumo
+
+Ao clicar em **Test**, o adaptador exibe o saldo restante separado por moeda, o saldo concedido, o saldo recarregado e a disponibilidade para novas chamadas. Não é necessário configurar outra chave ou uma variável global no WSL.
+
+O endpoint da DeepSeek não informa o saldo inicial nem um percentual consumido. O histórico de gasto continua sendo calculado pelos eventos de custo do Paperclip.
 
 ### Migração da versão 2026.10.20 ou anterior
 

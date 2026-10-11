@@ -2,6 +2,7 @@ import { DEEPSEEK_ADAPTER_TYPE } from "../constants.js";
 import { agentConfigurationDoc, getConfigSchema, models, sessionCodec, } from "../definition.js";
 import { execute } from "./execute.js";
 import { listModels, refreshModels } from "./models.js";
+import { fetchDeepSeekBalance } from "./quota.js";
 function environmentResult(status, checks) {
     return {
         adapterType: DEEPSEEK_ADAPTER_TYPE,
@@ -93,7 +94,7 @@ export async function testEnvironment(ctx) {
                     hint: `Available models: ${availableModelIds.join(", ")}`,
                 }]);
         }
-        return environmentResult("pass", [
+        const successChecks = [
             {
                 code: "deepseek_auth_valid",
                 level: "info",
@@ -104,7 +105,32 @@ export async function testEnvironment(ctx) {
                 level: "info",
                 message: `Model '${model}' is available`,
             },
-        ]);
+        ];
+        const balanceResult = await fetchDeepSeekBalance({
+            apiKey,
+            baseUrl,
+            timeoutMs: timeoutSec * 1000,
+        });
+        if (balanceResult.ok) {
+            for (const window of balanceResult.windows) {
+                successChecks.push({
+                    code: `deepseek_balance_${window.label.match(/\(([^)]+)\)/)?.[1]?.toLowerCase() || "available"}`,
+                    level: "info",
+                    message: `Balance: ${window.valueLabel}`,
+                    detail: window.detail,
+                });
+            }
+        }
+        else {
+            successChecks.push({
+                code: "deepseek_balance_unavailable",
+                level: "warn",
+                message: "Authenticated, but the DeepSeek balance could not be retrieved",
+                detail: balanceResult.error,
+                hint: "The adapter can still run. Try the test again or verify access to /user/balance.",
+            });
+        }
+        return environmentResult("pass", successChecks);
     }
     catch (error) {
         const timedOut = error instanceof Error && error.name === "AbortError";
@@ -141,5 +167,6 @@ export function createServerAdapter() {
 export const dashscopeServerAdapter = deepseekServerAdapter;
 export { execute };
 export { listModels, refreshModels };
+export { fetchDeepSeekBalance } from "./quota.js";
 export * from "./execute.js";
 //# sourceMappingURL=index.js.map

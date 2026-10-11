@@ -79,5 +79,6 @@ export declare const dashscopeServerAdapter: {
 };
 export { execute };
 export { listModels, refreshModels };
+export { fetchDeepSeekBalance } from "./quota.js";
 export * from "./execute.js";
 //# sourceMappingURL=index.d.ts.map
