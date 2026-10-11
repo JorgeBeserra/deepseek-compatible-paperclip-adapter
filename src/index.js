@@ -32,9 +32,9 @@ The model should support tool/function calling for Paperclip tools to work.
 `;
 
 export const DASHSCOPE_ADAPTER_METADATA = {
-    label: "OpenAI-Compatible API",
-    description: "Connect to DeepSeek and other OpenAI-compatible chat-completions APIs",
-    recommendedFor: "DeepSeek, OpenRouter, Dashscope/Qwen, Ollama, and compatible providers",
+    label: "DeepSeek",
+    description: "Connect DeepSeek models to Paperclip using the OpenAI-compatible API",
+    recommendedFor: "DeepSeek Chat and DeepSeek Reasoner",
     models,
     agentConfigurationDoc,
     supportsLocalAgentJwt: false,
