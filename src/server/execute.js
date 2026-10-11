@@ -926,11 +926,16 @@ async function executeTool(name, args, ctx, companyId) {
 // ---------------------------------------------------------------------------
 // Main execute function
 // ---------------------------------------------------------------------------
+export function normalizeTimeoutSec(value, fallback = 120) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 export async function execute(ctx) {
     const apiKey = asString(ctx.config.apiKey, "");
     const model = asString(ctx.config.model, "deepseek-flash");
     const baseUrl = asString(ctx.config.baseUrl, "https://api.deepseek.com");
-    const timeoutSec = asNumber(ctx.config.timeoutSec, 120);
+    const timeoutSec = normalizeTimeoutSec(ctx.config.timeoutSec);
     const maxIterations = asNumber(ctx.config.maxIterations, 20);
     if (!apiKey) {
         return {

@@ -16,6 +16,7 @@ import adapterFactory, {
 import {
     dashscopeServerAdapter,
     deepseekServerAdapter,
+    normalizeTimeoutSec,
     testEnvironment,
 } from "../dist/server/index.js";
 import { buildConfig } from "../dist/ui/index.js";
@@ -186,4 +187,18 @@ test("fails the environment test when DeepSeek rejects the API key", async (t) =
 
     assert.equal(result.status, "fail");
     assert.equal(result.checks[0].code, "deepseek_auth_failed");
+});
+
+test("never converts an empty or non-positive timeout into an instant timeout", () => {
+    assert.equal(normalizeTimeoutSec(undefined), 120);
+    assert.equal(normalizeTimeoutSec(""), 120);
+    assert.equal(normalizeTimeoutSec(0), 120);
+    assert.equal(normalizeTimeoutSec("0"), 120);
+    assert.equal(normalizeTimeoutSec(-5), 120);
+    assert.equal(normalizeTimeoutSec("invalid"), 120);
+    assert.equal(normalizeTimeoutSec(45), 45);
+
+    assert.equal(buildConfig({ timeoutSec: "0" }).timeoutSec, 120);
+    assert.equal(buildConfig({ timeoutSec: "-1" }).timeoutSec, 120);
+    assert.equal(buildConfig({ timeoutSec: "45" }).timeoutSec, 45);
 });

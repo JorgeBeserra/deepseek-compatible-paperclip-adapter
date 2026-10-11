@@ -1,3 +1,4 @@
+export declare function normalizeTimeoutSec(value: any, fallback?: number): number;
 export declare function execute(ctx: any): Promise<{
     exitCode: number;
     signal: null;
