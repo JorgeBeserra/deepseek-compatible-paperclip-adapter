@@ -48,6 +48,8 @@ Se o provedor exigir o caminho `/v1`, use `https://api.deepseek.com/v1`. A URL p
 
 Os modelos oficiais atuais são `deepseek-flash` (padrão) e `deepseek-v4-pro`. O adaptador também expõe os hooks de catálogo do Paperclip. Para que a atualização consulte `GET /models` diretamente, inicie o servidor com `DEEPSEEK_API_KEY` e, opcionalmente, `DEEPSEEK_BASE_URL`; sem essa variável global, o Paperclip usa o catálogo oficial incluído no pacote, pois sua API de descoberta não repassa a chave digitada no formulário do agente.
 
+O botão **Test** valida a configuração salva: exige API key e modelo, autentica em `GET /models` e confirma que o modelo selecionado está disponível. Essa verificação não executa uma geração de texto nem consome tokens de inferência.
+
 ### Migração da versão 2026.10.20 ou anterior
 
 O tipo antigo `openai_compatible_api` fazia o Paperclip exibir “Openai Compatible Api”. Remova a instalação antiga, instale novamente o pacote e altere os agentes existentes para `adapterType: "deepSeek"`. As demais opções de `adapterConfig` continuam compatíveis.

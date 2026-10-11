@@ -1,14 +1,10 @@
 import { getConfigSchema } from "../definition.js";
 import { execute } from "./execute.js";
 import { listModels, refreshModels } from "./models.js";
-declare function testEnvironment(_ctx: any): Promise<{
+export declare function testEnvironment(ctx: any): Promise<{
     adapterType: string;
-    status: string;
-    checks: {
-        code: string;
-        level: string;
-        message: string;
-    }[];
+    status: any;
+    checks: any;
     testedAt: string;
 }>;
 export declare const deepseekServerAdapter: {
@@ -82,7 +78,6 @@ export declare const dashscopeServerAdapter: {
     supportsLocalAgentJwt: boolean;
 };
 export { execute };
-export { testEnvironment };
 export { listModels, refreshModels };
 export * from "./execute.js";
 //# sourceMappingURL=index.d.ts.map
