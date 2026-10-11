@@ -6,9 +6,12 @@ import adapterFactory, {
     DASHSCOPE_API_ADAPTER_TYPE,
     DEEPSEEK_ADAPTER_METADATA,
     DEEPSEEK_ADAPTER_TYPE,
+    LEGACY_OPENAI_COMPATIBLE_ADAPTER_TYPE,
     createServerAdapter,
     getConfigSchema,
+    label,
     models,
+    type,
 } from "../dist/index.js";
 import {
     dashscopeServerAdapter,
@@ -17,7 +20,13 @@ import {
 import { buildConfig } from "../dist/ui/index.js";
 
 test("exports the DeepSeek adapter contract expected by Paperclip", () => {
-    assert.equal(DEEPSEEK_ADAPTER_TYPE, "openai_compatible_api");
+    assert.equal(DEEPSEEK_ADAPTER_TYPE, "deepSeek");
+    assert.equal(type, DEEPSEEK_ADAPTER_TYPE);
+    assert.equal(label, "DeepSeek");
+    assert.equal(
+        type.replace(/_/g, " ").replace(/\b\w/g, (character) => character.toUpperCase()),
+        "DeepSeek",
+    );
     assert.equal(adapterFactory, createServerAdapter);
 
     const adapter = createServerAdapter();
@@ -25,10 +34,15 @@ test("exports the DeepSeek adapter contract expected by Paperclip", () => {
     assert.equal(adapter.type, DEEPSEEK_ADAPTER_TYPE);
     assert.equal(typeof adapter.execute, "function");
     assert.equal(typeof adapter.testEnvironment, "function");
+    assert.equal(typeof adapter.getConfigSchema, "function");
+    assert.equal(adapter.models, models);
+    assert.match(adapter.agentConfigurationDoc, /DeepSeek/);
+    assert.equal(typeof adapter.sessionCodec.deserialize, "function");
 });
 
 test("keeps legacy named exports as compatibility aliases", () => {
-    assert.equal(DASHSCOPE_API_ADAPTER_TYPE, DEEPSEEK_ADAPTER_TYPE);
+    assert.equal(LEGACY_OPENAI_COMPATIBLE_ADAPTER_TYPE, "openai_compatible_api");
+    assert.equal(DASHSCOPE_API_ADAPTER_TYPE, LEGACY_OPENAI_COMPATIBLE_ADAPTER_TYPE);
     assert.equal(DASHSCOPE_ADAPTER_METADATA, DEEPSEEK_ADAPTER_METADATA);
     assert.equal(dashscopeServerAdapter, deepseekServerAdapter);
 });

@@ -24,7 +24,7 @@ Reinicie/recarregue o Paperclip depois da instalação. O pacote publicado deve 
 
 ## Configuração do agente
 
-Selecione o tipo de adaptador `openai_compatible_api` e configure `adapterConfig`:
+Selecione o tipo de adaptador `deepSeek` e configure `adapterConfig`:
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
@@ -45,6 +45,10 @@ Selecione o tipo de adaptador `openai_compatible_api` e configure `adapterConfig
 ```
 
 Se o provedor exigir o caminho `/v1`, use `https://api.deepseek.com/v1`. A URL precisa corresponder ao formato aceito pelo provedor; o adaptador acrescenta o caminho de chat completions.
+
+### Migração da versão 2026.10.20 ou anterior
+
+O tipo antigo `openai_compatible_api` fazia o Paperclip exibir “Openai Compatible Api”. Remova a instalação antiga, instale novamente o pacote e altere os agentes existentes para `adapterType: "deepSeek"`. As demais opções de `adapterConfig` continuam compatíveis.
 
 ## Desenvolvimento
 

@@ -1,4 +1,10 @@
 import { DEEPSEEK_ADAPTER_TYPE } from "../constants.js";
+import {
+    agentConfigurationDoc,
+    getConfigSchema,
+    models,
+    sessionCodec,
+} from "../definition.js";
 import { execute } from "./execute.js";
 
 async function testEnvironment(_ctx) {
@@ -7,7 +13,7 @@ async function testEnvironment(_ctx) {
         status: "pass",
         checks: [
             {
-                code: "openai_compatible_api_ready",
+                code: "deepseek_ready",
                 level: "info",
                 message: "OpenAI-compatible adapter ready — no local environment required",
             },
@@ -20,6 +26,11 @@ export const deepseekServerAdapter = {
     type: DEEPSEEK_ADAPTER_TYPE,
     execute,
     testEnvironment,
+    models,
+    agentConfigurationDoc,
+    sessionCodec,
+    getConfigSchema,
+    supportsLocalAgentJwt: false,
 };
 
 export function createServerAdapter() {
