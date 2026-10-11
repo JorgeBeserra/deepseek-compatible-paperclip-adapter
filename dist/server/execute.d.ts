@@ -4,12 +4,25 @@ export declare function execute(ctx: any): Promise<{
     signal: null;
     timedOut: boolean;
     errorMessage: string;
+    errorCode?: undefined;
     usage?: undefined;
     model?: undefined;
     provider?: undefined;
     costUsd?: undefined;
     summary?: undefined;
 } | {
+    exitCode: number;
+    signal: null;
+    timedOut: boolean;
+    errorCode: string;
+    errorMessage: string;
+    usage?: undefined;
+    model?: undefined;
+    provider?: undefined;
+    costUsd?: undefined;
+    summary?: undefined;
+} | {
+    errorCode?: undefined;
     errorMessage?: undefined;
     exitCode: number;
     signal: null;
