@@ -1,8 +1,8 @@
-import { DASHSCOPE_API_ADAPTER_TYPE } from "../index.js";
+import { DEEPSEEK_ADAPTER_TYPE } from "../constants.js";
 import { execute } from "./execute.js";
 async function testEnvironment(_ctx) {
     return {
-        adapterType: DASHSCOPE_API_ADAPTER_TYPE,
+        adapterType: DEEPSEEK_ADAPTER_TYPE,
         status: "pass",
         checks: [
             {
@@ -14,14 +14,16 @@ async function testEnvironment(_ctx) {
         testedAt: new Date().toISOString(),
     };
 }
-export const dashscopeServerAdapter = {
-    type: DASHSCOPE_API_ADAPTER_TYPE,
+export const deepseekServerAdapter = {
+    type: DEEPSEEK_ADAPTER_TYPE,
     execute,
     testEnvironment,
 };
 export function createServerAdapter() {
-    return dashscopeServerAdapter;
+    return deepseekServerAdapter;
 }
+/** @deprecated Use deepseekServerAdapter. */
+export const dashscopeServerAdapter = deepseekServerAdapter;
 export { execute };
 export { testEnvironment };
 export * from "./execute.js";

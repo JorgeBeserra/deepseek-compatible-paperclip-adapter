@@ -1,37 +1,33 @@
-/**
- * OpenAI-compatible API adapter for DeepSeek, OpenRouter, Dashscope/Qwen,
- * Ollama, and other compatible chat-completions endpoints.
- */
+/** DeepSeek adapter for Paperclip using DeepSeek's OpenAI-compatible API. */
 import { createServerAdapter } from "./server/index.js";
 
-export { DASHSCOPE_API_ADAPTER_TYPE } from "./constants.js";
+export {
+    DEEPSEEK_ADAPTER_TYPE,
+    DASHSCOPE_API_ADAPTER_TYPE,
+} from "./constants.js";
 
 export const models = [
     { id: "deepseek-chat", label: "DeepSeek Chat" },
     { id: "deepseek-reasoner", label: "DeepSeek Reasoner" },
-    { id: "qwen-plus", label: "Qwen Plus" },
-    { id: "qwen3.5-plus", label: "Qwen 3.5 Plus" },
-    { id: "qwen-turbo", label: "Qwen Turbo" },
-    { id: "qwen-max", label: "Qwen Max" },
 ];
 
-export const agentConfigurationDoc = `# OpenAI-Compatible API Agent Configuration
+export const agentConfigurationDoc = `# DeepSeek Agent Configuration
 
-Configure this agent to use any API compatible with OpenAI Chat Completions.
+Configure this Paperclip agent to use the DeepSeek API.
 
 ## Required fields
-- **API Key**: API key from your provider. For local keyless endpoints, use a placeholder only if accepted by the endpoint.
-- **Model**: Exact model ID supplied by your provider.
+- **API Key**: Your DeepSeek API key.
+- **Model**: DeepSeek model ID, such as \`deepseek-chat\` or \`deepseek-reasoner\`.
 
 ## Optional fields
-- **Base URL**: API root URL. DeepSeek: \`https://api.deepseek.com\`; OpenRouter: \`https://openrouter.ai/api/v1\`; Dashscope: \`https://dashscope.aliyuncs.com/compatible-mode/v1\`; Ollama: \`http://localhost:11434/v1\`.
+- **Base URL**: DeepSeek API root (default: \`https://api.deepseek.com\`).
 - **Timeout**: Request timeout in seconds (default: 120).
 - **Instructions**: System instructions for the agent.
 
 The model should support tool/function calling for Paperclip tools to work.
 `;
 
-export const DASHSCOPE_ADAPTER_METADATA = {
+export const DEEPSEEK_ADAPTER_METADATA = {
     label: "DeepSeek",
     description: "Connect DeepSeek models to Paperclip using the OpenAI-compatible API",
     recommendedFor: "DeepSeek Chat and DeepSeek Reasoner",
@@ -39,6 +35,9 @@ export const DASHSCOPE_ADAPTER_METADATA = {
     agentConfigurationDoc,
     supportsLocalAgentJwt: false,
 };
+
+/** @deprecated Use DEEPSEEK_ADAPTER_METADATA. */
+export const DASHSCOPE_ADAPTER_METADATA = DEEPSEEK_ADAPTER_METADATA;
 
 export { createServerAdapter };
 export { execute } from "./server/execute.js";

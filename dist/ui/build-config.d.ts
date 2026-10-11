@@ -1,4 +1,4 @@
-export function buildConfig(formValues: any): {
+export declare function buildConfig(formValues: any): {
     apiKey: any;
     model: any;
     baseUrl: any;
@@ -14,3 +14,4 @@ export function buildConfig(formValues: any): {
     skillDocs: any;
     skillSecrets: any;
 };
+//# sourceMappingURL=build-config.d.ts.map

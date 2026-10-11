@@ -1,6 +1,6 @@
 # DeepSeek-compatible Paperclip Adapter
 
-Adapter externo para conectar agentes do Paperclip a APIs compatíveis com o formato OpenAI, incluindo DeepSeek, OpenRouter, Dashscope/Qwen e Ollama.
+Adapter externo para conectar agentes do Paperclip à API da DeepSeek por meio do formato compatível com OpenAI.
 
 ## Instalação
 
@@ -46,27 +46,20 @@ Selecione o tipo de adaptador `openai_compatible_api` e configure `adapterConfig
 
 Se o provedor exigir o caminho `/v1`, use `https://api.deepseek.com/v1`. A URL precisa corresponder ao formato aceito pelo provedor; o adaptador acrescenta o caminho de chat completions.
 
-### Outros provedores
-
-- Dashscope/Qwen: `https://dashscope.aliyuncs.com/compatible-mode/v1`
-- OpenRouter: `https://openrouter.ai/api/v1`
-- Ollama: `http://localhost:11434/v1`
-
-Para Ollama, confirme que o serviço está acessível **a partir do processo/container do Paperclip**. `localhost` dentro de um container aponta para o próprio container, não necessariamente para o host.
-
 ## Desenvolvimento
 
 ```bash
 npm install
 npm run build
 npm run typecheck
+npm test
 ```
 
 O build compila os arquivos JavaScript de `src/` para `dist/`, que é o diretório publicado pelo pacote.
 
 ## Observações
 
-- O adaptador usa chamadas de chat completions compatíveis com OpenAI e um loop de execução de ferramentas.
+- O adaptador usa a interface de chat completions da DeepSeek e um loop de execução de ferramentas.
 - O modelo precisa suportar chamadas de ferramentas/function calling para executar ferramentas do Paperclip.
 - Nunca coloque chaves reais em commits, logs ou arquivos públicos.
 - Se o adaptador não aparecer, verifique o log do servidor do Paperclip e confirme que a versão instalada do pacote é a esperada.

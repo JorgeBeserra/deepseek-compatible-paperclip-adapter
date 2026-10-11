@@ -1,6 +1,6 @@
-export function execute(ctx: any): Promise<{
+export declare function execute(ctx: any): Promise<{
     exitCode: number;
-    signal: any;
+    signal: null;
     timedOut: boolean;
     errorMessage: string;
     usage?: undefined;
@@ -9,8 +9,9 @@ export function execute(ctx: any): Promise<{
     costUsd?: undefined;
     summary?: undefined;
 } | {
+    errorMessage?: undefined;
     exitCode: number;
-    signal: any;
+    signal: null;
     timedOut: boolean;
     usage: {
         inputTokens: number;
@@ -20,5 +21,5 @@ export function execute(ctx: any): Promise<{
     provider: string;
     costUsd: number;
     summary: string;
-    errorMessage?: undefined;
 }>;
+//# sourceMappingURL=execute.d.ts.map
