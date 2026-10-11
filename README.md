@@ -7,7 +7,7 @@ Adapter externo para conectar agentes do Paperclip a APIs compatíveis com o for
 No Paperclip, abra **Settings → Adapters → External** e instale o pacote:
 
 ```text
-@jorgebeserra/deepseek-compatible-paperclip-adapter
+deepseek-compatible-paperclip-adapter
 ```
 
 Alternativamente, configure `~/.paperclip/adapter-plugins.json`:
@@ -15,7 +15,7 @@ Alternativamente, configure `~/.paperclip/adapter-plugins.json`:
 ```json
 [
   {
-    "package": "@jorgebeserra/deepseek-compatible-paperclip-adapter"
+    "package": "deepseek-compatible-paperclip-adapter"
   }
 ]
 ```
