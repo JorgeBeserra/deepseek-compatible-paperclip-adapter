@@ -1,6 +1,6 @@
 {
   "name": "deepseek-compatible-paperclip-adapter",
-  "version": "2026.10.20",
+  "version": "2026.10.21",
   "description": "DeepSeek adapter for Paperclip using the OpenAI-compatible chat completions API",
   "license": "MIT",
   "repository": {

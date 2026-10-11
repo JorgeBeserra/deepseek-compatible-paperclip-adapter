@@ -203,7 +203,7 @@ const PAPERCLIP_TOOLS = [
         type: "function",
         function: {
             name: "paperclip_create_agent",
-            description: "Create (hire) a new agent in the company. Always set adapterType to openai_compatible_api and include a system prompt in adapterConfig.instructions describing the agent's role.",
+            description: "Create (hire) a new agent in the company. Always set adapterType to deepSeek and include a system prompt in adapterConfig.instructions describing the agent's role.",
             parameters: {
                 type: "object",
                 required: ["name", "adapterType"],
@@ -214,7 +214,7 @@ const PAPERCLIP_TOOLS = [
                     role: { type: "string", description: "Agent role: general (default), engineer, researcher, writer, reviewer, manager" },
                     capabilities: { type: "string", description: "Short description of what this agent can do" },
                     reportsTo: { type: "string", description: "UUID of the manager agent this agent reports to" },
-                    adapterType: { type: "string", description: "Always use openai_compatible_api" },
+                    adapterType: { type: "string", description: "Always use deepSeek" },
                     adapterConfig: {
                         type: "object",
                         description: "Adapter configuration. Must include: apiKey, model, baseUrl, instructions (system prompt / AGENTS.md for this agent)",
@@ -245,7 +245,7 @@ const PAPERCLIP_TOOLS = [
                     title: { type: "string" },
                     capabilities: { type: "string" },
                     reportsTo: { type: "string", description: "UUID of manager agent" },
-                    adapterType: { type: "string", description: "New adapter type, e.g. openai_compatible_api" },
+                    adapterType: { type: "string", description: "New adapter type, e.g. deepSeek" },
                     adapterConfig: {
                         type: "object",
                         description: "Adapter config to apply. Set replaceAdapterConfig=true to fully replace rather than merge.",
@@ -573,7 +573,7 @@ async function executeTool(name, args, ctx, companyId) {
             };
             return callPaperclipApi("POST", `/companies/${encId(cid)}/agents`, authToken, runId, {
                 ...agentBodyRest,
-                adapterType: "openai_compatible_api",
+                adapterType: "deepSeek",
                 adapterConfig: mergedAdapterConfig,
             });
         }
@@ -980,14 +980,14 @@ export async function execute(ctx) {
             `\n` +
             `AGENT SETUP (run on first wake or when asked to audit):\n` +
             `- Call paperclip_list_agents and check each agent's adapterType.\n` +
-            `- Any agent NOT using adapterType="openai_compatible_api" should be fixed with paperclip_update_agent:\n` +
-            `  { agentId, adapterType: "openai_compatible_api", replaceAdapterConfig: true, adapterConfig: { apiKey, model, baseUrl, instructions: "<role-specific system prompt>" } }\n` +
+            `- Any agent NOT using adapterType="deepSeek" should be fixed with paperclip_update_agent:\n` +
+            `  { agentId, adapterType: "deepSeek", replaceAdapterConfig: true, adapterConfig: { apiKey, model, baseUrl, instructions: "<role-specific system prompt>" } }\n` +
             `- The apiKey, model, and baseUrl can be copied from your own config — they are the same endpoint.\n` +
             `- Write a tailored instructions prompt for each agent's role (do NOT copy your own instructions).\n` +
             `- After updating all agents (or confirming all are already correct), mark the audit issue done.\n` +
             `\n` +
             `HIRING NEW AGENTS:\n` +
-            `- Always set adapterType="openai_compatible_api" and include adapterConfig.instructions (role system prompt).\n` +
+            `- Always set adapterType="deepSeek" and include adapterConfig.instructions (role system prompt).\n` +
             `- The apiKey, model, and baseUrl are inherited from your config automatically if not specified.`);
         const userPrompt = promptSections.join("\n\n") || "Begin your work cycle.";
         const instructions = asString(ctx.config.instructions, "");
