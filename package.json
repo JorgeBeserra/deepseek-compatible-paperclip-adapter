@@ -15,7 +15,7 @@
   ],
   "type": "module",
   "exports": {
-    ".": "./dist/index.d.ts",
+    ".": "./dist/index.js",
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js"
   },
@@ -29,8 +29,8 @@
     "@paperclipai/adapter-utils": "2026.1005.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.9.3"
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
   },
   "scripts": {
     "build": "tsc",
