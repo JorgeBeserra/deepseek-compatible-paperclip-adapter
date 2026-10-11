@@ -15,32 +15,27 @@
   ],
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./server": {
-      "types": "./dist/server/index.d.ts",
-      "import": "./dist/server/index.js"
-    },
-    "./ui": {
-      "types": "./dist/ui/index.d.ts",
-      "import": "./dist/ui/index.js"
-    }
+    ".": "./dist/index.d.ts",
+    "./server": "./dist/server/index.js",
+    "./ui": "./dist/ui/index.js"
   },
   "publishConfig": {
     "access": "public"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@paperclipai/adapter-utils": "2026.1005.0"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^22.0.0",
     "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src/",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
   },
