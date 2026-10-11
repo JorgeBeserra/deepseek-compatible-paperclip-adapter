@@ -6,6 +6,7 @@ import {
     sessionCodec,
 } from "../definition.js";
 import { execute } from "./execute.js";
+import { listModels, refreshModels } from "./models.js";
 
 async function testEnvironment(_ctx) {
     return {
@@ -27,6 +28,8 @@ export const deepseekServerAdapter = {
     execute,
     testEnvironment,
     models,
+    listModels,
+    refreshModels,
     agentConfigurationDoc,
     sessionCodec,
     getConfigSchema,
@@ -42,4 +45,5 @@ export const dashscopeServerAdapter = deepseekServerAdapter;
 
 export { execute };
 export { testEnvironment };
+export { listModels, refreshModels };
 export * from "./execute.js";

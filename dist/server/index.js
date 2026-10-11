@@ -1,6 +1,7 @@
 import { DEEPSEEK_ADAPTER_TYPE } from "../constants.js";
 import { agentConfigurationDoc, getConfigSchema, models, sessionCodec, } from "../definition.js";
 import { execute } from "./execute.js";
+import { listModels, refreshModels } from "./models.js";
 async function testEnvironment(_ctx) {
     return {
         adapterType: DEEPSEEK_ADAPTER_TYPE,
@@ -20,6 +21,8 @@ export const deepseekServerAdapter = {
     execute,
     testEnvironment,
     models,
+    listModels,
+    refreshModels,
     agentConfigurationDoc,
     sessionCodec,
     getConfigSchema,
@@ -32,5 +35,6 @@ export function createServerAdapter() {
 export const dashscopeServerAdapter = deepseekServerAdapter;
 export { execute };
 export { testEnvironment };
+export { listModels, refreshModels };
 export * from "./execute.js";
 //# sourceMappingURL=index.js.map

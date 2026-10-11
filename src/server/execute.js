@@ -563,7 +563,7 @@ async function executeTool(name, args, ctx, companyId) {
             const creatorCfg = (ctx.agent.adapterConfig && typeof ctx.agent.adapterConfig === "object") ? ctx.agent.adapterConfig : {};
             const inheritedApiKey = asString(creatorCfg["apiKey"], "");
             const inheritedBaseUrl = asString(creatorCfg["baseUrl"], "https://api.deepseek.com");
-            const inheritedModel = asString(creatorCfg["model"], "deepseek-chat");
+            const inheritedModel = asString(creatorCfg["model"], "deepseek-flash");
             const mergedAdapterConfig = {
                 apiKey: suppliedConfig["apiKey"] ?? inheritedApiKey,
                 model: suppliedConfig["model"] ?? inheritedModel,
@@ -928,7 +928,7 @@ async function executeTool(name, args, ctx, companyId) {
 // ---------------------------------------------------------------------------
 export async function execute(ctx) {
     const apiKey = asString(ctx.config.apiKey, "");
-    const model = asString(ctx.config.model, "deepseek-chat");
+    const model = asString(ctx.config.model, "deepseek-flash");
     const baseUrl = asString(ctx.config.baseUrl, "https://api.deepseek.com");
     const timeoutSec = asNumber(ctx.config.timeoutSec, 120);
     const maxIterations = asNumber(ctx.config.maxIterations, 20);
@@ -1050,13 +1050,15 @@ export async function execute(ctx) {
         }
         messages.push({ role: "user", content: userPrompt });
         const endpoint = `${baseUrl.replace(/\/$/, "")}/chat/completions`;
-        // Estimated DeepSeek pricing per 1M tokens. Configuration aliases keep
-        // older Paperclip agents working while new agents default to DeepSeek.
+        // Peak DeepSeek pricing per 1M tokens. Legacy aliases remain here so
+        // existing Paperclip agents can still report estimated costs.
         const MODEL_PRICING = {
+            "deepseek-flash": { input: 0.3, output: 1.2 },
+            "deepseek-v4-pro": { input: 1.32, output: 3.96 },
             "deepseek-chat": { input: 0.28, output: 0.42 },
             "deepseek-reasoner": { input: 0.28, output: 0.42 },
         };
-        const pricing = MODEL_PRICING[model] ?? MODEL_PRICING["deepseek-chat"];
+        const pricing = MODEL_PRICING[model] ?? MODEL_PRICING["deepseek-flash"];
         let totalInputTokens = 0;
         let totalOutputTokens = 0;
         let iteration = 0;

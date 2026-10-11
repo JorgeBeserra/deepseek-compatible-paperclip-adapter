@@ -1,7 +1,7 @@
 export const label = "DeepSeek";
 export const models = [
-    { id: "deepseek-chat", label: "DeepSeek Chat" },
-    { id: "deepseek-reasoner", label: "DeepSeek Reasoner" },
+    { id: "deepseek-flash", label: "DeepSeek-V4.1-Flash" },
+    { id: "deepseek-v4-pro", label: "DeepSeek-V4-Pro" },
 ];
 export const agentConfigurationDoc = `# DeepSeek Agent Configuration
 
@@ -9,7 +9,7 @@ Configure this Paperclip agent to use the DeepSeek API.
 
 ## Required fields
 - **API Key**: Your DeepSeek API key.
-- **Model**: DeepSeek model ID, such as \`deepseek-chat\` or \`deepseek-reasoner\`.
+- **Model**: DeepSeek model ID, such as \`deepseek-flash\` or \`deepseek-v4-pro\`.
 
 ## Optional fields
 - **Base URL**: DeepSeek API root (default: \`https://api.deepseek.com\`).
@@ -43,7 +43,7 @@ export function getConfigSchema() {
         fields: [
             { key: "apiKey", label: "API Key", type: "text", required: true },
             { key: "baseUrl", label: "Base URL", type: "text", required: false, default: "https://api.deepseek.com" },
-            { key: "model", label: "Model", type: "combobox", required: true, default: "deepseek-chat",
+            { key: "model", label: "Model", type: "combobox", required: true, default: "deepseek-flash",
                 options: models.map((model) => ({ value: model.id, label: model.label })) },
             { key: "timeoutSec", label: "Timeout (seconds)", type: "number", default: 120 },
             { key: "instructions", label: "Instructions", type: "textarea" },
@@ -53,7 +53,7 @@ export function getConfigSchema() {
 export const DEEPSEEK_ADAPTER_METADATA = {
     label,
     description: "Connect DeepSeek models to Paperclip using the OpenAI-compatible API",
-    recommendedFor: "DeepSeek Chat and DeepSeek Reasoner",
+    recommendedFor: "DeepSeek V4.1 Flash and DeepSeek V4 Pro",
     models,
     agentConfigurationDoc,
     supportsLocalAgentJwt: false,
