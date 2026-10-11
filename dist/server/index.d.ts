@@ -1,5 +1,6 @@
 import { getConfigSchema } from "../definition.js";
 import { execute } from "./execute.js";
+import { listModels, refreshModels } from "./models.js";
 declare function testEnvironment(_ctx: any): Promise<{
     adapterType: string;
     status: string;
@@ -18,6 +19,8 @@ export declare const deepseekServerAdapter: {
         id: string;
         label: string;
     }[];
+    listModels: typeof listModels;
+    refreshModels: typeof refreshModels;
     agentConfigurationDoc: string;
     sessionCodec: {
         deserialize(raw: any): {
@@ -39,6 +42,8 @@ export declare function createServerAdapter(): {
         id: string;
         label: string;
     }[];
+    listModels: typeof listModels;
+    refreshModels: typeof refreshModels;
     agentConfigurationDoc: string;
     sessionCodec: {
         deserialize(raw: any): {
@@ -61,6 +66,8 @@ export declare const dashscopeServerAdapter: {
         id: string;
         label: string;
     }[];
+    listModels: typeof listModels;
+    refreshModels: typeof refreshModels;
     agentConfigurationDoc: string;
     sessionCodec: {
         deserialize(raw: any): {
@@ -76,5 +83,6 @@ export declare const dashscopeServerAdapter: {
 };
 export { execute };
 export { testEnvironment };
+export { listModels, refreshModels };
 export * from "./execute.js";
 //# sourceMappingURL=index.d.ts.map

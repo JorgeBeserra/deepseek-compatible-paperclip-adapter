@@ -3,7 +3,7 @@ export declare const models: {
     id: string;
     label: string;
 }[];
-export declare const agentConfigurationDoc = "# DeepSeek Agent Configuration\n\nConfigure this Paperclip agent to use the DeepSeek API.\n\n## Required fields\n- **API Key**: Your DeepSeek API key.\n- **Model**: DeepSeek model ID, such as `deepseek-chat` or `deepseek-reasoner`.\n\n## Optional fields\n- **Base URL**: DeepSeek API root (default: `https://api.deepseek.com`).\n- **Timeout**: Request timeout in seconds (default: 120).\n- **Instructions**: System instructions for the agent.\n\nThe model should support tool/function calling for Paperclip tools to work.\n";
+export declare const agentConfigurationDoc = "# DeepSeek Agent Configuration\n\nConfigure this Paperclip agent to use the DeepSeek API.\n\n## Required fields\n- **API Key**: Your DeepSeek API key.\n- **Model**: DeepSeek model ID, such as `deepseek-flash` or `deepseek-v4-pro`.\n\n## Optional fields\n- **Base URL**: DeepSeek API root (default: `https://api.deepseek.com`).\n- **Timeout**: Request timeout in seconds (default: 120).\n- **Instructions**: System instructions for the agent.\n\nThe model should support tool/function calling for Paperclip tools to work.\n";
 export declare const sessionCodec: {
     deserialize(raw: any): {
         sessionId: any;

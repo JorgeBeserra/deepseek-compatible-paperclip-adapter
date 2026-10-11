@@ -39,12 +39,14 @@ Selecione o tipo de adaptador `deepSeek` e configure `adapterConfig`:
 ```json
 {
   "apiKey": "SUA_CHAVE_DEEPSEEK",
-  "model": "deepseek-chat",
+  "model": "deepseek-flash",
   "baseUrl": "https://api.deepseek.com"
 }
 ```
 
 Se o provedor exigir o caminho `/v1`, use `https://api.deepseek.com/v1`. A URL precisa corresponder ao formato aceito pelo provedor; o adaptador acrescenta o caminho de chat completions.
+
+Os modelos oficiais atuais são `deepseek-flash` (padrão) e `deepseek-v4-pro`. O adaptador também expõe os hooks de catálogo do Paperclip. Para que a atualização consulte `GET /models` diretamente, inicie o servidor com `DEEPSEEK_API_KEY` e, opcionalmente, `DEEPSEEK_BASE_URL`; sem essa variável global, o Paperclip usa o catálogo oficial incluído no pacote, pois sua API de descoberta não repassa a chave digitada no formulário do agente.
 
 ### Migração da versão 2026.10.20 ou anterior
 
