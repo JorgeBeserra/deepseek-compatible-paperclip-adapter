@@ -26,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
       - name: Check whether package version changed
@@ -61,6 +61,10 @@ jobs:
       - name: Build package
         if: steps.version.outputs.changed == 'true'
         run: npm run build
+
+      - name: Synchronize JavaScript runtime files
+        if: steps.version.outputs.changed == 'true'
+        run: cp -R src/. dist/
 
       - name: Verify adapter factory export
         if: steps.version.outputs.changed == 'true'

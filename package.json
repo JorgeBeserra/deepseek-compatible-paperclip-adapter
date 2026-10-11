@@ -1,6 +1,6 @@
 {
   "name": "deepseek-compatible-paperclip-adapter",
-  "version": "2026.10.17",
+  "version": "2026.10.18",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -40,5 +40,8 @@
     "typecheck": "tsc --noEmit"
   },
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts"
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=24.11.0"
+  }
 }
