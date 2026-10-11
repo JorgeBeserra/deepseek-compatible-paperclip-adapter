@@ -40,6 +40,7 @@ test("exports the DeepSeek adapter contract expected by Paperclip", async () => 
     assert.equal(typeof adapter.listModels, "function");
     assert.equal(typeof adapter.refreshModels, "function");
     assert.equal(adapter.models, models);
+    assert.equal(adapter.supportsLocalAgentJwt, true);
     assert.deepEqual(await adapter.listModels(), models);
     assert.match(adapter.agentConfigurationDoc, /DeepSeek/);
     assert.equal(typeof adapter.sessionCodec.deserialize, "function");
@@ -58,6 +59,7 @@ test("uses DeepSeek names and defaults throughout public configuration", () => {
         { id: "deepseek-v4-pro", label: "DeepSeek-V4-Pro" },
     ]);
     assert.equal(DEEPSEEK_ADAPTER_METADATA.label, "DeepSeek");
+    assert.equal(DEEPSEEK_ADAPTER_METADATA.supportsLocalAgentJwt, true);
     assert.match(DEEPSEEK_ADAPTER_METADATA.description, /DeepSeek/);
 
     const fields = Object.fromEntries(
@@ -201,4 +203,97 @@ test("never converts an empty or non-positive timeout into an instant timeout", 
     assert.equal(buildConfig({ timeoutSec: "0" }).timeoutSec, 120);
     assert.equal(buildConfig({ timeoutSec: "-1" }).timeoutSec, 120);
     assert.equal(buildConfig({ timeoutSec: "45" }).timeoutSec, 45);
+});
+
+test("fails before provider dispatch when Paperclip does not inject an agent token", async () => {
+    let providerCalled = false;
+    const previousFetch = globalThis.fetch;
+    globalThis.fetch = async () => {
+        providerCalled = true;
+        throw new Error("provider must not be called without Paperclip authentication");
+    };
+
+    try {
+        const result = await deepseekServerAdapter.execute({
+            runId: "run-1",
+            agent: {
+                id: "agent-1",
+                companyId: "company-1",
+                name: "CEO",
+                adapterType: DEEPSEEK_ADAPTER_TYPE,
+                adapterConfig: {},
+            },
+            runtime: { sessionId: null, sessionParams: null, sessionDisplayId: null, taskKey: null },
+            config: { apiKey: "deepseek-test-key", model: "deepseek-flash" },
+            context: {},
+            onLog: async () => {},
+        });
+
+        assert.equal(result.exitCode, 1);
+        assert.equal(result.errorCode, "paperclip_auth_token_missing");
+        assert.equal(providerCalled, false);
+    }
+    finally {
+        globalThis.fetch = previousFetch;
+    }
+});
+
+test("stops the agent loop on the first Paperclip authentication rejection", async () => {
+    const previousFetch = globalThis.fetch;
+    const requestedUrls = [];
+    globalThis.fetch = async (url, init) => {
+        requestedUrls.push(String(url));
+        if (String(url) === "https://api.deepseek.com/chat/completions") {
+            return new Response(JSON.stringify({
+                choices: [{
+                    finish_reason: "tool_calls",
+                    message: {
+                        role: "assistant",
+                        content: null,
+                        tool_calls: [
+                            {
+                                id: "call-1",
+                                type: "function",
+                                function: { name: "paperclip_list_agents", arguments: "{}" },
+                            },
+                            {
+                                id: "call-2",
+                                type: "function",
+                                function: { name: "paperclip_list_projects", arguments: "{}" },
+                            },
+                        ],
+                    },
+                }],
+                usage: { prompt_tokens: 10, completion_tokens: 5 },
+            }));
+        }
+
+        assert.equal(init.headers.Authorization, "Bearer run-token");
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    };
+
+    try {
+        const result = await deepseekServerAdapter.execute({
+            runId: "run-1",
+            authToken: "run-token",
+            agent: {
+                id: "agent-1",
+                companyId: "company-1",
+                name: "CEO",
+                adapterType: DEEPSEEK_ADAPTER_TYPE,
+                adapterConfig: {},
+            },
+            runtime: { sessionId: null, sessionParams: null, sessionDisplayId: null, taskKey: null },
+            config: { apiKey: "deepseek-test-key", model: "deepseek-flash" },
+            context: {},
+            onLog: async () => {},
+        });
+
+        assert.equal(result.exitCode, 1);
+        assert.equal(result.errorCode, "paperclip_auth_rejected");
+        assert.equal(requestedUrls.length, 2);
+    }
+    finally {
+        globalThis.fetch = previousFetch;
+    }
 });

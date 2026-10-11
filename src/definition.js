@@ -61,7 +61,7 @@ export const DEEPSEEK_ADAPTER_METADATA = {
     recommendedFor: "DeepSeek V4.1 Flash and DeepSeek V4 Pro",
     models,
     agentConfigurationDoc,
-    supportsLocalAgentJwt: false,
+    supportsLocalAgentJwt: true,
 };
 
 /** @deprecated Use DEEPSEEK_ADAPTER_METADATA. */

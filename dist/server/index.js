@@ -132,7 +132,7 @@ export const deepseekServerAdapter = {
     agentConfigurationDoc,
     sessionCodec,
     getConfigSchema,
-    supportsLocalAgentJwt: false,
+    supportsLocalAgentJwt: true,
 };
 export function createServerAdapter() {
     return deepseekServerAdapter;

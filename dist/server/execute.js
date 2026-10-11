@@ -410,6 +410,13 @@ const PAPERCLIP_TOOLS = [
 // ---------------------------------------------------------------------------
 // Paperclip API helper
 // ---------------------------------------------------------------------------
+class PaperclipApiError extends Error {
+    constructor(message, status) {
+        super(message);
+        this.name = "PaperclipApiError";
+        this.status = status;
+    }
+}
 async function callPaperclipApi(method, path, authToken, runId, body) {
     const runtimeHost = process.env.PAPERCLIP_LISTEN_HOST ?? process.env.HOST ?? "localhost";
     const runtimePort = process.env.PAPERCLIP_LISTEN_PORT ?? process.env.PORT ?? "3100";
@@ -441,7 +448,7 @@ async function callPaperclipApi(method, path, authToken, runId, body) {
         const errMsg = parsed && typeof parsed === "object" && "error" in parsed
             ? parsed.error
             : text;
-        throw new Error(`${method} ${path} failed with ${res.status}: ${errMsg}`);
+        throw new PaperclipApiError(`${method} ${path} failed with ${res.status}: ${errMsg}`, res.status);
     }
     return parsed;
 }
@@ -944,6 +951,15 @@ export async function execute(ctx) {
             errorMessage: "Missing API key in configuration",
         };
     }
+    if (!ctx.authToken?.trim()) {
+        return {
+            exitCode: 1,
+            signal: null,
+            timedOut: false,
+            errorCode: "paperclip_auth_token_missing",
+            errorMessage: "Paperclip did not provide a run-scoped agent authentication token",
+        };
+    }
     try {
         const paperclipEnv = buildPaperclipEnv({ id: ctx.agent.id, companyId: ctx.agent.companyId });
         const promptSections = [];
@@ -1150,8 +1166,17 @@ export async function execute(ctx) {
                 }
                 catch (err) {
                     const errMsg = err instanceof Error ? err.message : String(err);
-                    toolResult = { error: errMsg };
                     await ctx.onLog("stderr", `[tool error: ${toolName}] ${errMsg}`);
+                    if (err instanceof PaperclipApiError && (err.status === 401 || err.status === 403)) {
+                        return {
+                            exitCode: 1,
+                            signal: null,
+                            timedOut: false,
+                            errorCode: "paperclip_auth_rejected",
+                            errorMessage: `Paperclip rejected the run-scoped agent token (HTTP ${err.status})`,
+                        };
+                    }
+                    toolResult = { error: errMsg };
                 }
                 messages.push({
                     role: "tool",
