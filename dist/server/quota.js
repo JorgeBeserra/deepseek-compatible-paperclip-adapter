@@ -87,10 +87,4 @@ export async function fetchDeepSeekBalance({ apiKey, baseUrl = DEFAULT_BASE_URL,
         clearTimeout(timeoutHandle);
     }
 }
-export async function getQuotaWindows() {
-    return fetchDeepSeekBalance({
-        apiKey: process.env.DEEPSEEK_API_KEY,
-        baseUrl: process.env.DEEPSEEK_BASE_URL || DEFAULT_BASE_URL,
-    });
-}
 //# sourceMappingURL=quota.js.map

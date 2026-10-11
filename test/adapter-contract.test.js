@@ -17,7 +17,6 @@ import {
     dashscopeServerAdapter,
     deepseekServerAdapter,
     fetchDeepSeekBalance,
-    getQuotaWindows,
     normalizeTimeoutSec,
     testEnvironment,
 } from "../dist/server/index.js";
@@ -41,7 +40,6 @@ test("exports the DeepSeek adapter contract expected by Paperclip", async () => 
     assert.equal(typeof adapter.getConfigSchema, "function");
     assert.equal(typeof adapter.listModels, "function");
     assert.equal(typeof adapter.refreshModels, "function");
-    assert.equal(typeof adapter.getQuotaWindows, "function");
     assert.equal(adapter.models, models);
     assert.equal(adapter.supportsLocalAgentJwt, true);
     assert.deepEqual(await adapter.listModels(), models);
@@ -116,7 +114,7 @@ test("refreshes the model catalog from DeepSeek when the server has a global API
     assert.deepEqual(await deepseekServerAdapter.refreshModels(), models);
 });
 
-test("reports DeepSeek balance as Paperclip quota windows", async (t) => {
+test("maps DeepSeek balance entries for the adapter environment test", async (t) => {
     const previousFetch = globalThis.fetch;
     t.after(() => {
         globalThis.fetch = previousFetch;
@@ -162,22 +160,6 @@ test("reports DeepSeek balance as Paperclip quota windows", async (t) => {
             detail: "Granted: CNY 10.00 · Topped up: CNY 100.00 · API calls: available",
         },
     ]);
-});
-
-test("returns a safe quota error when the server balance key is missing", async (t) => {
-    const previousApiKey = process.env.DEEPSEEK_API_KEY;
-    t.after(() => {
-        if (previousApiKey === undefined)
-            delete process.env.DEEPSEEK_API_KEY;
-        else
-            process.env.DEEPSEEK_API_KEY = previousApiKey;
-    });
-    delete process.env.DEEPSEEK_API_KEY;
-
-    const result = await getQuotaWindows();
-    assert.equal(result.ok, false);
-    assert.deepEqual(result.windows, []);
-    assert.match(result.error, /DEEPSEEK_API_KEY/);
 });
 
 test("reports a rejected DeepSeek balance key without throwing", async (t) => {
@@ -238,8 +220,19 @@ test("tests the API key and configured model against DeepSeek", async (t) => {
         globalThis.fetch = previousFetch;
     });
     globalThis.fetch = async (url, init) => {
-        assert.equal(url, "https://api.deepseek.com/models");
         assert.equal(init.headers.Authorization, "Bearer valid-test-key");
+        if (url === "https://api.deepseek.com/user/balance") {
+            return new Response(JSON.stringify({
+                is_available: true,
+                balance_infos: [{
+                    currency: "USD",
+                    total_balance: "42.50",
+                    granted_balance: "2.50",
+                    topped_up_balance: "40.00",
+                }],
+            }));
+        }
+        assert.equal(url, "https://api.deepseek.com/models");
         return new Response(JSON.stringify({
             object: "list",
             data: [
@@ -263,7 +256,10 @@ test("tests the API key and configured model against DeepSeek", async (t) => {
     assert.deepEqual(result.checks.map((check) => check.code), [
         "deepseek_auth_valid",
         "deepseek_model_available",
+        "deepseek_balance_usd",
     ]);
+    assert.equal(result.checks[2].message, "Balance: USD 42.50 remaining");
+    assert.match(result.checks[2].detail, /Granted: USD 2\.50/);
 });
 
 test("fails the environment test when DeepSeek rejects the API key", async (t) => {

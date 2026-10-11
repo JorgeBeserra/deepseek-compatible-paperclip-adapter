@@ -3,7 +3,6 @@ const DEFAULT_BASE_URL = "https://api.deepseek.com";
 function readAmount(value) {
     return typeof value === "string" && value.trim() ? value.trim() : "0.00";
 }
-
 function balanceWindow(info, isAvailable) {
     const currency = typeof info.currency === "string" && info.currency.trim()
         ? info.currency.trim().toUpperCase()
@@ -95,11 +94,4 @@ export async function fetchDeepSeekBalance({ apiKey, baseUrl = DEFAULT_BASE_URL,
     finally {
         clearTimeout(timeoutHandle);
     }
-}
-
-export async function getQuotaWindows() {
-    return fetchDeepSeekBalance({
-        apiKey: process.env.DEEPSEEK_API_KEY,
-        baseUrl: process.env.DEEPSEEK_BASE_URL || DEFAULT_BASE_URL,
-    });
 }

@@ -14,17 +14,4 @@ export declare function fetchDeepSeekBalance({ apiKey, baseUrl, timeoutMs }?: {
     ok: boolean;
     windows: any;
 }>;
-export declare function getQuotaWindows(): Promise<{
-    provider: string;
-    source: string;
-    ok: boolean;
-    error: string;
-    windows: never[];
-} | {
-    error?: undefined;
-    provider: string;
-    source: string;
-    ok: boolean;
-    windows: any;
-}>;
 //# sourceMappingURL=quota.d.ts.map
