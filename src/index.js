@@ -68,66 +68,15 @@ export const sessionCodec = {
 };
 
 export function getConfigSchema() {
-    // Ensure we have at least the curated defaults for the UI
-    const modelOptions = models.length > 0
-        ? models.map((m) => ({ value: m.id, label: m.label }))
-        : [
-            { value: "deepseek/deepseek-chat-v3-0324:free", label: "DeepSeek V3 0324 (free)" },
-            { value: "anthropic/claude-sonnet-4-6", label: "Claude Sonnet 4.6 (paid)" },
-            { value: "openai/gpt-4o", label: "GPT-4o (paid)" },
-        ];
     return {
         fields: [
-            {
-                key: "apiKey",
-                label: "OpenRouter API Key",
-                type: "text",
-                required: true,
-                hint: "Get one at https://openrouter.ai/keys. Store as a Paperclip secret in production.",
-            },
-            {
-                key: "model",
-                label: "Model",
-                type: "combobox",
-                default: DEFAULT_MODEL,
-                options: modelOptions,
-                hint: "OpenRouter model id. 370+ models available after initialization.",
-            },
-            {
-                key: "temperature",
-                label: "Temperature",
-                type: "number",
-                default: 0.2,
-            },
-            {
-                key: "maxTokens",
-                label: "Max output tokens",
-                type: "number",
-                hint: "Leave blank to use the model's default.",
-            },
-            {
-                key: "systemPrompt",
-                label: "System prompt",
-                type: "textarea",
-                hint: "Optional override of the built-in system prompt.",
-            },
-        ],
-    };
-
-export function createServerAdapter() {
-    const schema = getConfigSchema();
-    return {
-        type: ADAPTER_TYPE,
-        execute,
-        testEnvironment,
-        listModels,
-        refreshModels: listModels,
-        sessionCodec,
-        models,
-        agentConfigurationDoc,
-        getConfigSchema,
-        configSchema: schema,
-        supportsInstructionsBundle: false,
+            { key: "apiKey", label: "API Key", type: "text", required: true },
+            { key: "baseUrl", label: "Base URL", type: "text", required: false, default: "https://api.deepseek.com" },
+            { key: "model", label: "Model", type: "combobox", required: true, default: "deepseek-chat",
+              options: models.map(m => ({ value: m.id, label: m.label })) },
+            { key: "timeoutSec", label: "Timeout (seconds)", type: "number", default: 120 },
+            { key: "instructions", label: "Instructions", type: "textarea" }
+        ]
     };
 }
 
