@@ -1,6 +1,6 @@
 {
   "name": "@jorgebeserra/deepseek-compatible-paperclip-adapter",
-  "version": "2026.10.14",
+  "version": "2026.10.15",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -24,9 +24,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "dependencies": {
     "@paperclipai/adapter-utils": "2026.1005.0"
   },
