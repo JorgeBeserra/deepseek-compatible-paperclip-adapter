@@ -16,6 +16,7 @@ import adapterFactory, {
 import {
     dashscopeServerAdapter,
     deepseekServerAdapter,
+    testEnvironment,
 } from "../dist/server/index.js";
 import { buildConfig } from "../dist/ui/index.js";
 
@@ -107,4 +108,82 @@ test("refreshes the model catalog from DeepSeek when the server has a global API
     };
 
     assert.deepEqual(await deepseekServerAdapter.refreshModels(), models);
+});
+
+test("fails the environment test without an API key and does not call DeepSeek", async (t) => {
+    const previousFetch = globalThis.fetch;
+    t.after(() => {
+        globalThis.fetch = previousFetch;
+    });
+    globalThis.fetch = async () => {
+        throw new Error("fetch must not be called without an API key");
+    };
+
+    const result = await testEnvironment({
+        companyId: "company-1",
+        adapterType: DEEPSEEK_ADAPTER_TYPE,
+        config: {
+            apiKey: "",
+            model: "deepseek-flash",
+            baseUrl: "https://api.deepseek.com",
+        },
+    });
+
+    assert.equal(result.status, "fail");
+    assert.equal(result.checks[0].code, "deepseek_api_key_missing");
+});
+
+test("tests the API key and configured model against DeepSeek", async (t) => {
+    const previousFetch = globalThis.fetch;
+    t.after(() => {
+        globalThis.fetch = previousFetch;
+    });
+    globalThis.fetch = async (url, init) => {
+        assert.equal(url, "https://api.deepseek.com/models");
+        assert.equal(init.headers.Authorization, "Bearer valid-test-key");
+        return new Response(JSON.stringify({
+            object: "list",
+            data: [
+                { id: "deepseek-flash", name: "DeepSeek-V4.1-Flash" },
+                { id: "deepseek-v4-pro", name: "DeepSeek-V4-Pro" },
+            ],
+        }));
+    };
+
+    const result = await testEnvironment({
+        companyId: "company-1",
+        adapterType: DEEPSEEK_ADAPTER_TYPE,
+        config: {
+            apiKey: "valid-test-key",
+            model: "deepseek-v4-pro",
+            baseUrl: "https://api.deepseek.com",
+        },
+    });
+
+    assert.equal(result.status, "pass");
+    assert.deepEqual(result.checks.map((check) => check.code), [
+        "deepseek_auth_valid",
+        "deepseek_model_available",
+    ]);
+});
+
+test("fails the environment test when DeepSeek rejects the API key", async (t) => {
+    const previousFetch = globalThis.fetch;
+    t.after(() => {
+        globalThis.fetch = previousFetch;
+    });
+    globalThis.fetch = async () => new Response("Unauthorized", { status: 401 });
+
+    const result = await testEnvironment({
+        companyId: "company-1",
+        adapterType: DEEPSEEK_ADAPTER_TYPE,
+        config: {
+            apiKey: "invalid-test-key",
+            model: "deepseek-flash",
+            baseUrl: "https://api.deepseek.com",
+        },
+    });
+
+    assert.equal(result.status, "fail");
+    assert.equal(result.checks[0].code, "deepseek_auth_failed");
 });
