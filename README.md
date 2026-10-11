@@ -52,6 +52,8 @@ O botão **Test** valida a configuração salva: exige API key e modelo, autenti
 
 Durante cada run, o Paperclip injeta um JWT de agente de curta duração para as chamadas de ferramentas internas. Em instalações próprias, confirme que `PAPERCLIP_AGENT_JWT_SECRET` (ou o fallback `BETTER_AUTH_SECRET` nas versões atuais do Paperclip) está definido no processo do servidor.
 
+O adaptador não migra automaticamente outros agentes para DeepSeek. Alterações de adapter, credenciais, responsável ou hierarquia organizacional somente devem ocorrer quando a tarefa atual solicitar explicitamente essa mudança.
+
 ### Migração da versão 2026.10.20 ou anterior
 
 O tipo antigo `openai_compatible_api` fazia o Paperclip exibir “Openai Compatible Api”. Remova a instalação antiga, instale novamente o pacote e altere os agentes existentes para `adapterType: "deepSeek"`. As demais opções de `adapterConfig` continuam compatíveis.

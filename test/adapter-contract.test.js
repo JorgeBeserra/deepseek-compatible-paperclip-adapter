@@ -297,3 +297,121 @@ test("stops the agent loop on the first Paperclip authentication rejection", asy
         globalThis.fetch = previousFetch;
     }
 });
+
+test("does not instruct agents to perform unsolicited adapter migrations", async () => {
+    const previousFetch = globalThis.fetch;
+    let providerRequest;
+    globalThis.fetch = async (url, init) => {
+        assert.equal(String(url), "https://api.deepseek.com/chat/completions");
+        providerRequest = JSON.parse(init.body);
+        return new Response(JSON.stringify({
+            choices: [{
+                finish_reason: "stop",
+                message: { role: "assistant", content: "Ready." },
+            }],
+            usage: { prompt_tokens: 10, completion_tokens: 2 },
+        }));
+    };
+
+    try {
+        const result = await deepseekServerAdapter.execute({
+            runId: "run-1",
+            authToken: "run-token",
+            agent: {
+                id: "agent-1",
+                companyId: "company-1",
+                name: "CEO",
+                adapterType: DEEPSEEK_ADAPTER_TYPE,
+                adapterConfig: {},
+            },
+            runtime: { sessionId: null, sessionParams: null, sessionDisplayId: null, taskKey: null },
+            config: { apiKey: "deepseek-test-key", model: "deepseek-flash" },
+            context: {},
+            onLog: async () => {},
+        });
+
+        assert.equal(result.exitCode, 0);
+        const prompt = JSON.stringify(providerRequest.messages);
+        assert.match(prompt, /Different adapter types are valid/);
+        assert.doesNotMatch(prompt, /Any agent NOT using adapterType/);
+        assert.doesNotMatch(prompt, /Always set adapterType.*deepSeek/i);
+    }
+    finally {
+        globalThis.fetch = previousFetch;
+    }
+});
+
+test("preserves an explicitly requested non-DeepSeek adapter when creating an agent", async () => {
+    const previousFetch = globalThis.fetch;
+    let providerCalls = 0;
+    let createdAgentBody;
+    globalThis.fetch = async (url, init) => {
+        if (String(url) === "https://api.deepseek.com/chat/completions") {
+            providerCalls++;
+            if (providerCalls === 1) {
+                return new Response(JSON.stringify({
+                    choices: [{
+                        finish_reason: "tool_calls",
+                        message: {
+                            role: "assistant",
+                            content: null,
+                            tool_calls: [{
+                                id: "call-create-agent",
+                                type: "function",
+                                function: {
+                                    name: "paperclip_create_agent",
+                                    arguments: JSON.stringify({
+                                        name: "Developer",
+                                        adapterType: "codex_local",
+                                        adapterConfig: { command: "codex" },
+                                    }),
+                                },
+                            }],
+                        },
+                    }],
+                    usage: { prompt_tokens: 10, completion_tokens: 5 },
+                }));
+            }
+            return new Response(JSON.stringify({
+                choices: [{
+                    finish_reason: "stop",
+                    message: { role: "assistant", content: "Created." },
+                }],
+                usage: { prompt_tokens: 5, completion_tokens: 2 },
+            }));
+        }
+
+        createdAgentBody = JSON.parse(init.body);
+        return new Response(JSON.stringify({ id: "new-agent" }));
+    };
+
+    try {
+        const result = await deepseekServerAdapter.execute({
+            runId: "run-1",
+            authToken: "run-token",
+            agent: {
+                id: "agent-1",
+                companyId: "company-1",
+                name: "CEO",
+                adapterType: DEEPSEEK_ADAPTER_TYPE,
+                adapterConfig: {
+                    apiKey: "private-deepseek-key",
+                    model: "deepseek-v4-pro",
+                    baseUrl: "https://api.deepseek.com",
+                },
+            },
+            runtime: { sessionId: null, sessionParams: null, sessionDisplayId: null, taskKey: null },
+            config: { apiKey: "deepseek-test-key", model: "deepseek-flash" },
+            context: {},
+            onLog: async () => {},
+        });
+
+        assert.equal(result.exitCode, 0);
+        assert.equal(createdAgentBody.adapterType, "codex_local");
+        assert.deepEqual(createdAgentBody.adapterConfig, { command: "codex" });
+        assert.equal(providerCalls, 2);
+    }
+    finally {
+        globalThis.fetch = previousFetch;
+    }
+});
