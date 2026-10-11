@@ -1,6 +1,7 @@
 {
   "name": "deepseek-compatible-paperclip-adapter",
-  "version": "2026.10.19",
+  "version": "2026.10.20",
+  "description": "DeepSeek adapter for Paperclip using the OpenAI-compatible chat completions API",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -33,11 +34,12 @@
     "typescript": "^7.0.2"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "npm run clean && tsc",
     "dev": "tsc --watch",
     "lint": "eslint src/",
     "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

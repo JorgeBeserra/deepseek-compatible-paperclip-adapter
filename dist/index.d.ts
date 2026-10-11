@@ -1,20 +1,85 @@
-export default function createServerAdapterDefault(): any;
-/**
- * OpenAI-compatible API adapter for DeepSeek, OpenRouter, Dashscope/Qwen,
- * Ollama, and other compatible chat-completions endpoints.
- */
-export const DASHSCOPE_API_ADAPTER_TYPE: "openai_compatible_api";
-export const models: {
+/** DeepSeek adapter for Paperclip using DeepSeek's OpenAI-compatible API. */
+import { createServerAdapter } from "./server/index.js";
+export { DEEPSEEK_ADAPTER_TYPE, DASHSCOPE_API_ADAPTER_TYPE, } from "./constants.js";
+export declare const models: {
     id: string;
     label: string;
 }[];
-export const agentConfigurationDoc: "# OpenAI-Compatible API Agent Configuration\n\nConfigure this agent to use any API compatible with OpenAI Chat Completions.\n\n## Required fields\n- **API Key**: API key from your provider. For local keyless endpoints, use a placeholder only if accepted by the endpoint.\n- **Model**: Exact model ID supplied by your provider.\n\n## Optional fields\n- **Base URL**: API root URL. DeepSeek: `https://api.deepseek.com`; OpenRouter: `https://openrouter.ai/api/v1`; Dashscope: `https://dashscope.aliyuncs.com/compatible-mode/v1`; Ollama: `http://localhost:11434/v1`.\n- **Timeout**: Request timeout in seconds (default: 120).\n- **Instructions**: System instructions for the agent.\n\nThe model should support tool/function calling for Paperclip tools to work.\n";
-export namespace DASHSCOPE_ADAPTER_METADATA {
-    export let label: string;
-    export let description: string;
-    export let recommendedFor: string;
-    export { models };
-    export { agentConfigurationDoc };
-    export let supportsLocalAgentJwt: boolean;
-}
+export declare const agentConfigurationDoc = "# DeepSeek Agent Configuration\n\nConfigure this Paperclip agent to use the DeepSeek API.\n\n## Required fields\n- **API Key**: Your DeepSeek API key.\n- **Model**: DeepSeek model ID, such as `deepseek-chat` or `deepseek-reasoner`.\n\n## Optional fields\n- **Base URL**: DeepSeek API root (default: `https://api.deepseek.com`).\n- **Timeout**: Request timeout in seconds (default: 120).\n- **Instructions**: System instructions for the agent.\n\nThe model should support tool/function calling for Paperclip tools to work.\n";
+export declare const DEEPSEEK_ADAPTER_METADATA: {
+    label: string;
+    description: string;
+    recommendedFor: string;
+    models: {
+        id: string;
+        label: string;
+    }[];
+    agentConfigurationDoc: string;
+    supportsLocalAgentJwt: boolean;
+};
+/** @deprecated Use DEEPSEEK_ADAPTER_METADATA. */
+export declare const DASHSCOPE_ADAPTER_METADATA: {
+    label: string;
+    description: string;
+    recommendedFor: string;
+    models: {
+        id: string;
+        label: string;
+    }[];
+    agentConfigurationDoc: string;
+    supportsLocalAgentJwt: boolean;
+};
+export { createServerAdapter };
 export { execute } from "./server/execute.js";
+export declare const sessionCodec: {
+    deserialize(raw: any): {
+        sessionId: any;
+    } | null;
+    serialize(params: any): {
+        sessionId: any;
+    } | null;
+    getDisplayId(params: any): string | null;
+};
+export declare function getConfigSchema(): {
+    fields: ({
+        key: string;
+        label: string;
+        type: string;
+        required: boolean;
+        options?: undefined;
+        default?: undefined;
+    } | {
+        key: string;
+        label: string;
+        type: string;
+        required: boolean;
+        default: string;
+        options?: undefined;
+    } | {
+        key: string;
+        label: string;
+        type: string;
+        required: boolean;
+        default: string;
+        options: {
+            value: string;
+            label: string;
+        }[];
+    } | {
+        required?: undefined;
+        options?: undefined;
+        key: string;
+        label: string;
+        type: string;
+        default: number;
+    } | {
+        required?: undefined;
+        options?: undefined;
+        default?: undefined;
+        key: string;
+        label: string;
+        type: string;
+    })[];
+};
+export default createServerAdapter;
+//# sourceMappingURL=index.d.ts.map

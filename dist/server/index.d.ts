@@ -1,16 +1,5 @@
-export function createServerAdapter(): {
-    type: string;
-    execute: typeof execute;
-    testEnvironment: typeof testEnvironment;
-};
-export namespace dashscopeServerAdapter {
-    export { DASHSCOPE_API_ADAPTER_TYPE as type };
-    export { execute };
-    export { testEnvironment };
-}
-export * from "./execute.js";
 import { execute } from "./execute.js";
-export function testEnvironment(_ctx: any): Promise<{
+declare function testEnvironment(_ctx: any): Promise<{
     adapterType: string;
     status: string;
     checks: {
@@ -20,5 +9,23 @@ export function testEnvironment(_ctx: any): Promise<{
     }[];
     testedAt: string;
 }>;
-import { DASHSCOPE_API_ADAPTER_TYPE } from "../index.js";
+export declare const deepseekServerAdapter: {
+    type: string;
+    execute: typeof execute;
+    testEnvironment: typeof testEnvironment;
+};
+export declare function createServerAdapter(): {
+    type: string;
+    execute: typeof execute;
+    testEnvironment: typeof testEnvironment;
+};
+/** @deprecated Use deepseekServerAdapter. */
+export declare const dashscopeServerAdapter: {
+    type: string;
+    execute: typeof execute;
+    testEnvironment: typeof testEnvironment;
+};
 export { execute };
+export { testEnvironment };
+export * from "./execute.js";
+//# sourceMappingURL=index.d.ts.map

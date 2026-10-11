@@ -562,8 +562,8 @@ async function executeTool(name, args, ctx, companyId) {
             const suppliedConfig = (rawAdapterConfig && typeof rawAdapterConfig === "object") ? rawAdapterConfig : {};
             const creatorCfg = (ctx.agent.adapterConfig && typeof ctx.agent.adapterConfig === "object") ? ctx.agent.adapterConfig : {};
             const inheritedApiKey = asString(creatorCfg["apiKey"], "");
-            const inheritedBaseUrl = asString(creatorCfg["baseUrl"], "https://dashscope.aliyuncs.com/compatible-mode/v1");
-            const inheritedModel = asString(creatorCfg["model"], "qwen-plus");
+            const inheritedBaseUrl = asString(creatorCfg["baseUrl"], "https://api.deepseek.com");
+            const inheritedModel = asString(creatorCfg["model"], "deepseek-chat");
             const mergedAdapterConfig = {
                 apiKey: suppliedConfig["apiKey"] ?? inheritedApiKey,
                 model: suppliedConfig["model"] ?? inheritedModel,
@@ -928,8 +928,8 @@ async function executeTool(name, args, ctx, companyId) {
 // ---------------------------------------------------------------------------
 export async function execute(ctx) {
     const apiKey = asString(ctx.config.apiKey, "");
-    const model = asString(ctx.config.model, "qwen-plus");
-    const baseUrl = asString(ctx.config.baseUrl, "https://dashscope.aliyuncs.com/compatible-mode/v1");
+    const model = asString(ctx.config.model, "deepseek-chat");
+    const baseUrl = asString(ctx.config.baseUrl, "https://api.deepseek.com");
     const timeoutSec = asNumber(ctx.config.timeoutSec, 120);
     const maxIterations = asNumber(ctx.config.maxIterations, 20);
     if (!apiKey) {
@@ -1050,27 +1050,13 @@ export async function execute(ctx) {
         }
         messages.push({ role: "user", content: userPrompt });
         const endpoint = `${baseUrl.replace(/\/$/, "")}/chat/completions`;
-        // Pricing per 1M tokens — Dashscope list prices in CNY converted to USD (÷7.25)
-        // CNY sources: https://help.aliyun.com/zh/model-studio/getting-started/models
+        // Estimated DeepSeek pricing per 1M tokens. Configuration aliases keep
+        // older Paperclip agents working while new agents default to DeepSeek.
         const MODEL_PRICING = {
-            "qwen-plus": { input: 0.055, output: 0.166 }, // ¥0.4 / ¥1.2 per 1M
-            "qwen-plus-latest": { input: 0.055, output: 0.166 },
-            "qwen-max": { input: 0.345, output: 1.379 }, // ¥2.5 / ¥10 per 1M (≤32K tier)
-            "qwen-max-latest": { input: 0.345, output: 1.379 },
-            "qwen-turbo": { input: 0.041, output: 0.138 }, // ¥0.3 / ¥1.0 per 1M
-            "qwen-turbo-latest": { input: 0.041, output: 0.138 },
-            "qwen2.5-plus": { input: 0.069, output: 0.207 }, // ¥0.5 / ¥1.5 per 1M
-            "qwen2.5-max": { input: 0.345, output: 1.379 },
-            "qwen3.5-plus": { input: 0.276, output: 1.655 }, // ¥2 / ¥12 per 1M (≤256K tier)
-            "qwen3.6-plus": { input: 0.276, output: 1.655 }, // ¥2 / ¥12 per 1M (≤256K tier)
-            "qwen3-8b": { input: 0.069, output: 0.276 }, // ¥0.5 / ¥2 per 1M
-            "qwen3-14b": { input: 0.138, output: 0.552 }, // ¥1 / ¥4 per 1M
-            "qwen3-32b": { input: 0.276, output: 1.103 }, // ¥2 / ¥8 per 1M
-            "qwen3-30b-a3b": { input: 0.103, output: 0.414 }, // ¥0.75 / ¥3 per 1M
-            "qwen3-235b-a22b": { input: 0.276, output: 1.103 }, // ¥2 / ¥8 per 1M
-            "qwen2.5-72b-instruct": { input: 0.055, output: 0.166 },
+            "deepseek-chat": { input: 0.28, output: 0.42 },
+            "deepseek-reasoner": { input: 0.28, output: 0.42 },
         };
-        const pricing = MODEL_PRICING[model] ?? MODEL_PRICING["qwen-plus"];
+        const pricing = MODEL_PRICING[model] ?? MODEL_PRICING["deepseek-chat"];
         let totalInputTokens = 0;
         let totalOutputTokens = 0;
         let iteration = 0;
@@ -1110,7 +1096,7 @@ export async function execute(ctx) {
             const choice = data.choices?.[0];
             const assistantMessage = choice?.message;
             const finishReason = choice?.finish_reason;
-            // Sanitize tool_call arguments — Qwen rejects non-JSON strings in history
+            // Sanitize tool-call arguments for OpenAI-compatible chat history.
             const sanitizedAssistant = assistantMessage?.tool_calls
                 ? {
                     ...assistantMessage,
