@@ -2,6 +2,7 @@ import { DEEPSEEK_ADAPTER_TYPE } from "../constants.js";
 import { agentConfigurationDoc, getConfigSchema, models, sessionCodec, } from "../definition.js";
 import { execute } from "./execute.js";
 import { listModels, refreshModels } from "./models.js";
+import { getQuotaWindows } from "./quota.js";
 function environmentResult(status, checks) {
     return {
         adapterType: DEEPSEEK_ADAPTER_TYPE,
@@ -129,6 +130,7 @@ export const deepseekServerAdapter = {
     models,
     listModels,
     refreshModels,
+    getQuotaWindows,
     agentConfigurationDoc,
     sessionCodec,
     getConfigSchema,
@@ -141,5 +143,6 @@ export function createServerAdapter() {
 export const dashscopeServerAdapter = deepseekServerAdapter;
 export { execute };
 export { listModels, refreshModels };
+export { fetchDeepSeekBalance, getQuotaWindows } from "./quota.js";
 export * from "./execute.js";
 //# sourceMappingURL=index.js.map

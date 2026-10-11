@@ -54,6 +54,12 @@ Durante cada run, o Paperclip injeta um JWT de agente de curta duração para as
 
 O adaptador não migra automaticamente outros agentes para DeepSeek. Alterações de adapter, credenciais, responsável ou hierarquia organizacional somente devem ocorrer quando a tarefa atual solicitar explicitamente essa mudança.
 
+### Saldo e consumo
+
+O adaptador consulta `GET /user/balance` e publica o saldo restante no painel de quota/custos do Paperclip, separado por moeda. Configure `DEEPSEEK_API_KEY` no ambiente do processo do servidor e reinicie o Paperclip; `DEEPSEEK_BASE_URL` é opcional e usa `https://api.deepseek.com` por padrão.
+
+O endpoint da DeepSeek informa o saldo total restante, saldo concedido, saldo recarregado e disponibilidade para novas chamadas. Ele não informa o saldo inicial nem um percentual consumido; por isso o adaptador retorna `usedPercent: null`, enquanto o histórico de gasto continua sendo calculado pelos eventos de custo do Paperclip.
+
 ### Migração da versão 2026.10.20 ou anterior
 
 O tipo antigo `openai_compatible_api` fazia o Paperclip exibir “Openai Compatible Api”. Remova a instalação antiga, instale novamente o pacote e altere os agentes existentes para `adapterType: "deepSeek"`. As demais opções de `adapterConfig` continuam compatíveis.

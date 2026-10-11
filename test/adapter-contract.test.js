@@ -16,6 +16,8 @@ import adapterFactory, {
 import {
     dashscopeServerAdapter,
     deepseekServerAdapter,
+    fetchDeepSeekBalance,
+    getQuotaWindows,
     normalizeTimeoutSec,
     testEnvironment,
 } from "../dist/server/index.js";
@@ -39,6 +41,7 @@ test("exports the DeepSeek adapter contract expected by Paperclip", async () => 
     assert.equal(typeof adapter.getConfigSchema, "function");
     assert.equal(typeof adapter.listModels, "function");
     assert.equal(typeof adapter.refreshModels, "function");
+    assert.equal(typeof adapter.getQuotaWindows, "function");
     assert.equal(adapter.models, models);
     assert.equal(adapter.supportsLocalAgentJwt, true);
     assert.deepEqual(await adapter.listModels(), models);
@@ -111,6 +114,99 @@ test("refreshes the model catalog from DeepSeek when the server has a global API
     };
 
     assert.deepEqual(await deepseekServerAdapter.refreshModels(), models);
+});
+
+test("reports DeepSeek balance as Paperclip quota windows", async (t) => {
+    const previousFetch = globalThis.fetch;
+    t.after(() => {
+        globalThis.fetch = previousFetch;
+    });
+    globalThis.fetch = async (url, init) => {
+        assert.equal(url, "https://api.deepseek.com/user/balance");
+        assert.equal(init.headers.Authorization, "Bearer balance-test-key");
+        return new Response(JSON.stringify({
+            is_available: true,
+            balance_infos: [
+                {
+                    currency: "USD",
+                    total_balance: "42.50",
+                    granted_balance: "2.50",
+                    topped_up_balance: "40.00",
+                },
+                {
+                    currency: "CNY",
+                    total_balance: "110.00",
+                    granted_balance: "10.00",
+                    topped_up_balance: "100.00",
+                },
+            ],
+        }));
+    };
+
+    const result = await fetchDeepSeekBalance({ apiKey: "balance-test-key" });
+    assert.equal(result.provider, "deepseek");
+    assert.equal(result.ok, true);
+    assert.deepEqual(result.windows, [
+        {
+            label: "DeepSeek balance (USD)",
+            usedPercent: null,
+            resetsAt: null,
+            valueLabel: "USD 42.50 remaining",
+            detail: "Granted: USD 2.50 · Topped up: USD 40.00 · API calls: available",
+        },
+        {
+            label: "DeepSeek balance (CNY)",
+            usedPercent: null,
+            resetsAt: null,
+            valueLabel: "CNY 110.00 remaining",
+            detail: "Granted: CNY 10.00 · Topped up: CNY 100.00 · API calls: available",
+        },
+    ]);
+});
+
+test("returns a safe quota error when the server balance key is missing", async (t) => {
+    const previousApiKey = process.env.DEEPSEEK_API_KEY;
+    t.after(() => {
+        if (previousApiKey === undefined)
+            delete process.env.DEEPSEEK_API_KEY;
+        else
+            process.env.DEEPSEEK_API_KEY = previousApiKey;
+    });
+    delete process.env.DEEPSEEK_API_KEY;
+
+    const result = await getQuotaWindows();
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.windows, []);
+    assert.match(result.error, /DEEPSEEK_API_KEY/);
+});
+
+test("reports a rejected DeepSeek balance key without throwing", async (t) => {
+    const previousFetch = globalThis.fetch;
+    t.after(() => {
+        globalThis.fetch = previousFetch;
+    });
+    globalThis.fetch = async () => new Response("Unauthorized", { status: 401 });
+
+    const result = await fetchDeepSeekBalance({ apiKey: "invalid-key" });
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.windows, []);
+    assert.match(result.error, /rejected.*HTTP 401/i);
+});
+
+test("does not report success when DeepSeek returns no valid balance entries", async (t) => {
+    const previousFetch = globalThis.fetch;
+    t.after(() => {
+        globalThis.fetch = previousFetch;
+    });
+    globalThis.fetch = async () => new Response(JSON.stringify({
+        is_available: true,
+        balance_infos: [null],
+    }));
+
+    const result = await fetchDeepSeekBalance({ apiKey: "balance-test-key" });
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.windows, []);
+    assert.match(result.error, /no balance entries/i);
 });
 
 test("fails the environment test without an API key and does not call DeepSeek", async (t) => {

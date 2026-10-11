@@ -7,6 +7,7 @@ import {
 } from "../definition.js";
 import { execute } from "./execute.js";
 import { listModels, refreshModels } from "./models.js";
+import { getQuotaWindows } from "./quota.js";
 
 function environmentResult(status, checks) {
     return {
@@ -147,6 +148,7 @@ export const deepseekServerAdapter = {
     models,
     listModels,
     refreshModels,
+    getQuotaWindows,
     agentConfigurationDoc,
     sessionCodec,
     getConfigSchema,
@@ -162,4 +164,5 @@ export const dashscopeServerAdapter = deepseekServerAdapter;
 
 export { execute };
 export { listModels, refreshModels };
+export { fetchDeepSeekBalance, getQuotaWindows } from "./quota.js";
 export * from "./execute.js";

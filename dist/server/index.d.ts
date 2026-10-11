@@ -1,6 +1,7 @@
 import { getConfigSchema } from "../definition.js";
 import { execute } from "./execute.js";
 import { listModels, refreshModels } from "./models.js";
+import { getQuotaWindows } from "./quota.js";
 export declare function testEnvironment(ctx: any): Promise<{
     adapterType: string;
     status: any;
@@ -17,6 +18,7 @@ export declare const deepseekServerAdapter: {
     }[];
     listModels: typeof listModels;
     refreshModels: typeof refreshModels;
+    getQuotaWindows: typeof getQuotaWindows;
     agentConfigurationDoc: string;
     sessionCodec: {
         deserialize(raw: any): {
@@ -40,6 +42,7 @@ export declare function createServerAdapter(): {
     }[];
     listModels: typeof listModels;
     refreshModels: typeof refreshModels;
+    getQuotaWindows: typeof getQuotaWindows;
     agentConfigurationDoc: string;
     sessionCodec: {
         deserialize(raw: any): {
@@ -64,6 +67,7 @@ export declare const dashscopeServerAdapter: {
     }[];
     listModels: typeof listModels;
     refreshModels: typeof refreshModels;
+    getQuotaWindows: typeof getQuotaWindows;
     agentConfigurationDoc: string;
     sessionCodec: {
         deserialize(raw: any): {
@@ -79,5 +83,6 @@ export declare const dashscopeServerAdapter: {
 };
 export { execute };
 export { listModels, refreshModels };
+export { fetchDeepSeekBalance, getQuotaWindows } from "./quota.js";
 export * from "./execute.js";
 //# sourceMappingURL=index.d.ts.map
